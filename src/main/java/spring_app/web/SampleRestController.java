@@ -1,0 +1,112 @@
+package spring_app.web;
+
+import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import spring_app.data.ContestRepository;
+import spring_app.data.TeamRepository;
+import spring_app.dto.ContestEditDto;
+import spring_app.dto.TeamEditDto;
+import spring_app.model.Contest;
+import spring_app.model.Person;
+import spring_app.model.PersonCountByAge;
+import spring_app.model.Team;
+import spring_app.service.BusinessConstraintViolationException;
+import spring_app.service.SampleService;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+@Controller
+@RequestMapping("/")
+@Slf4j
+@RestController
+public class SampleRestController {
+
+    @Autowired
+    SampleService service;
+
+    @GetMapping("/team/all")
+    public List<Team> getTeams() {
+        return service.findAllTeams();
+    }
+
+    @GetMapping("/contest/all")
+    public List<Contest> getContests() {
+        return service.findAllContests();
+    }
+
+    @GetMapping("/person/all")
+    public List<Person> getPeople() {
+        return service.findAllPeople();
+    }
+
+
+    @PostMapping("/populate")
+    public ResponseEntity<String> populate() throws ParseException {
+        service.populate();
+        return new ResponseEntity<>("DB succesfully populated", HttpStatus.OK);
+    }
+
+    @GetMapping("/team")
+    public List<Team> getTeamsInContest(
+            @RequestParam Long contestId) throws NotFoundException {
+        return service.getTeamsInContest(contestId);
+    }
+
+    @GetMapping("/team/age")
+    public List<PersonCountByAge> getTeamMembersAgeReport() {
+        return service.getTeamMembersAgeReport();
+    }
+
+    @GetMapping("/contest/occupancy")
+    public String getContestOccupancyReport(
+            @RequestParam int contestId) throws NotFoundException {
+        return service.getContestOccupancyReport(Long.valueOf(contestId));
+    }
+
+    @PostMapping("/contest/registration")
+    public Team registerInContest(@RequestParam Long teamId,
+                                  @RequestParam Long contestId)
+            throws NotFoundException, BusinessConstraintViolationException {
+        return service.registerTeamInContest(teamId, contestId);
+    }
+
+    @PostMapping("/team/edit")
+    public Team editTeam(@RequestBody TeamEditDto teamDto)
+            throws BusinessConstraintViolationException, NotFoundException {
+        return service.editTeam(teamDto);
+    }
+
+    @PostMapping("/contest/edit")
+    public Contest editContest(@RequestBody ContestEditDto contestDto)
+            throws BusinessConstraintViolationException, NotFoundException {
+        return service.editContest(contestDto);
+    }
+
+    @PostMapping("/contest/mark_edit")
+    public Contest setContestEditable(@RequestParam Long contestId)
+            throws NotFoundException {
+        return service.setContestEditable(contestId, true);
+    }
+
+    @PostMapping("/contest/mark_readonly")
+    public Contest setContestReadonly(@RequestParam Long contestId)
+            throws NotFoundException {
+        return service.setContestEditable(contestId, false);
+    }
+
+    @PostMapping("/team/promote")
+    public Team promoteTeam(@RequestParam Long teamId,
+                            @RequestParam Long superContestId)
+            throws NotFoundException, BusinessConstraintViolationException {
+        return service.promoteTeam(teamId, superContestId);
+    }
+}
