@@ -3,15 +3,10 @@ package spring_app.web;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import spring_app.data.ContestRepository;
-import spring_app.data.TeamRepository;
-import spring_app.dto.ContestEditDto;
-import spring_app.dto.TeamEditDto;
 import spring_app.model.Contest;
 import spring_app.model.Person;
 import spring_app.model.PersonCountByAge;
@@ -20,8 +15,6 @@ import spring_app.service.BusinessConstraintViolationException;
 import spring_app.service.SampleService;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -86,16 +79,16 @@ public class SampleRestController {
         return service.registerTeamInContest(team, contestId);
     }
 
-    @PostMapping("/team/edit")
-    public Team editTeam(@RequestBody TeamEditDto teamDto)
+    @PatchMapping("/team/edit")
+    public Team editTeam(@RequestBody Team team)
             throws BusinessConstraintViolationException, NotFoundException {
-        return service.editTeam(teamDto);
+        return service.editTeam(team);
     }
 
-    @PostMapping("/contest/edit")
-    public Contest editContest(@RequestBody ContestEditDto contestDto)
+    @PatchMapping("/contest/edit")
+    public Contest editContest(@RequestBody Contest contest)
             throws BusinessConstraintViolationException, NotFoundException {
-        return service.editContest(contestDto);
+        return service.editContest(contest);
     }
 
     @PostMapping("/contest/mark_edit")

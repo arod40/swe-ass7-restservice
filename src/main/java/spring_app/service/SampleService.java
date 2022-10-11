@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import spring_app.data.ContestRepository;
 import spring_app.data.PersonRepository;
 import spring_app.data.TeamRepository;
-import spring_app.dto.ContestEditDto;
-import spring_app.dto.TeamEditDto;
 import spring_app.model.*;
 
 import java.text.ParseException;
@@ -294,26 +292,26 @@ public class SampleService {
         return team;
     }
 
-    public Team editTeam(TeamEditDto teamDto)
+    public Team editTeam(Team teamPatch)
             throws NotFoundException, BusinessConstraintViolationException {
-        Optional<Team> teamOpt = teamRepository.findById(teamDto.getId());
+        Optional<Team> teamOpt = teamRepository.findById(teamPatch.getId());
         if (!teamOpt.isPresent()) throw new NotFoundException(
-                "Team with id " + teamDto.getId() + " not found");
+                "Team with id " + teamPatch.getId() + " not found");
         Team team = teamOpt.get();
-        mapDtoToTeam(teamDto, team);
+        mapPatchToTeam(teamPatch, team);
         validationService.validateTeamEdit(team);
         teamRepository.save(team);
         return team;
     }
 
-    public Contest editContest(ContestEditDto contestDto)
+    public Contest editContest(Contest contestPatch)
             throws NotFoundException, BusinessConstraintViolationException {
         Optional<Contest> contestOpt =
-                contestRepository.findById(contestDto.getId());
+                contestRepository.findById(contestPatch.getId());
         if (!contestOpt.isPresent()) throw new NotFoundException(
-                "Contest with id " + contestDto.getId() + " not found");
+                "Contest with id " + contestPatch.getId() + " not found");
         Contest contest = contestOpt.get();
-        mapDtoToContest(contestDto, contest);
+        mapPatchToContest(contestPatch, contest);
         validationService.validateContestEdit(contest);
         contestRepository.save(contest);
         return contest;
@@ -354,22 +352,25 @@ public class SampleService {
         return promotedTeam;
     }
 
-    private void mapDtoToTeam(TeamEditDto teamDto, Team team) {
-        if (teamDto.getName() != null) team.setName(teamDto.getName());
-        if (teamDto.getRank() != null) team.setRank(teamDto.getRank());
-        if (teamDto.getState() != null) team.setState(teamDto.getState());
+    private void mapPatchToTeam(Team teamPatch, Team team) {
+        if (teamPatch.getName() != null) team.setName(teamPatch.getName());
+        if (teamPatch.getRank() != null) team.setRank(teamPatch.getRank());
+        if (teamPatch.getState() != null) team.setState(teamPatch.getState());
     }
 
-    private void mapDtoToContest(ContestEditDto contestDto, Contest contest) {
-        if (contestDto.getCapacity() != null) contest.setCapacity(
-                contestDto.getCapacity());
-        if (contestDto.getDate() != null) contest.setDate(contestDto.getDate());
-        if (contestDto.getName() != null) contest.setName(contestDto.getName());
-        if (contestDto.getRegistrationAllowed() != null)
-            contest.setRegistrationAllowed(contestDto.getRegistrationAllowed());
-        if (contestDto.getRegistrationFrom() != null)
-            contest.setRegistrationFrom(contestDto.getRegistrationFrom());
-        if (contestDto.getRegistrationTo() != null)
-            contest.setRegistrationTo(contestDto.getRegistrationTo());
+    private void mapPatchToContest(Contest contestPatch, Contest contest) {
+        if (contestPatch.getCapacity() != null) contest.setCapacity(
+                contestPatch.getCapacity());
+        if (contestPatch.getDate() != null)
+            contest.setDate(contestPatch.getDate());
+        if (contestPatch.getName() != null)
+            contest.setName(contestPatch.getName());
+        if (contestPatch.getRegistrationAllowed() != null)
+            contest.setRegistrationAllowed(
+                    contestPatch.getRegistrationAllowed());
+        if (contestPatch.getRegistrationFrom() != null)
+            contest.setRegistrationFrom(contestPatch.getRegistrationFrom());
+        if (contestPatch.getRegistrationTo() != null)
+            contest.setRegistrationTo(contestPatch.getRegistrationTo());
     }
 }
