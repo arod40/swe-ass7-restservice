@@ -13,6 +13,7 @@ import spring_app.model.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SampleService {
@@ -244,21 +245,49 @@ public class SampleService {
 
     }
 
-    public Team registerTeamInContest(Long teamId, Long contestId)
+    public Team registerTeamInContest(Team team, Long contestId)
             throws NotFoundException, BusinessConstraintViolationException {
         Optional<Contest> contestOpt = contestRepository.findById(contestId);
-        Optional<Team> teamOpt = teamRepository.findById(teamId);
         if (!contestOpt.isPresent()) throw new NotFoundException(
                 "Contest with id " + contestId + " not found");
-        if (!teamOpt.isPresent()) throw new NotFoundException(
-                "Team with id " + teamId + " not found");
+
+        ArrayList missing = new ArrayList<Long>();
+        team.setContestants(team.getContestants().stream().map(x -> {
+            if (x.getId() != null) {
+                Optional<Person> personOpt =
+                        personRepository.findById(x.getId());
+                if (!personOpt.isPresent()) {
+                    missing.add(x.getId());
+                    return null;
+                } else return personOpt.get();
+            } else return x;
+        }).collect(Collectors.toSet()));
+
+        if (missing.size() != 0) throw new BusinessConstraintViolationException(
+                "Person(s) with ids " + missing + " not found");
+
+        Person coach = team.getCoach();
+        if (coach.getId() != null) {
+            Optional<Person> coachOpt =
+                    personRepository.findById(coach.getId());
+            if (!coachOpt.isPresent())
+                throw new BusinessConstraintViolationException(
+                        "Person (coach) with id " + coach.getId() +
+                                " not found");
+            team.setCoach(coachOpt.get());
+        }
 
         Contest contest = contestOpt.get();
-        Team team = teamOpt.get();
         validationService.validateNonFullContest(contest);
         validationService.validateTeamRegistrationInContest(team,
                 contest);
 
+        for (Person person : team.getContestants())
+            if (person.getId() == null) personRepository.save(person);
+        if (team.getCoach().getId() == null)
+            personRepository.save(team.getCoach());
+        team.setState(State.Pending);
+        team.setRank(0);
         team.setAttendedContest(contest);
         teamRepository.save(team);
 

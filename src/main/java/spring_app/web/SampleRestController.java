@@ -33,6 +33,13 @@ public class SampleRestController {
     @Autowired
     SampleService service;
 
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST,
+            reason = "Business Constraint Violation")
+    @ExceptionHandler(BusinessConstraintViolationException.class)
+    public void handleBusinessConstraintViolationException() {
+        // Nothing to do
+    }
+
     @GetMapping("/team/all")
     public List<Team> getTeams() {
         return service.findAllTeams();
@@ -73,10 +80,10 @@ public class SampleRestController {
     }
 
     @PostMapping("/contest/registration")
-    public Team registerInContest(@RequestParam Long teamId,
+    public Team registerInContest(@RequestBody Team team,
                                   @RequestParam Long contestId)
             throws NotFoundException, BusinessConstraintViolationException {
-        return service.registerTeamInContest(teamId, contestId);
+        return service.registerTeamInContest(team, contestId);
     }
 
     @PostMapping("/team/edit")
