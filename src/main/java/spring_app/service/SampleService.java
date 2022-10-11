@@ -86,27 +86,6 @@ public class SampleService {
         contestantFrank.setUniversity("StreetUniversity");
         personRepository.save(contestantFrank);
 
-        Person contestantGreg = new Person();
-        contestantGreg.setName("Greg");
-        contestantGreg.setBirthdate(simpleDateFormat.parse("01-01-2005"));
-        contestantGreg.setEmail("greg@icpc.com");
-        contestantGreg.setUniversity("StreetUniversity");
-        personRepository.save(contestantGreg);
-
-        Person contestantHilary = new Person();
-        contestantHilary.setName("Hilary");
-        contestantHilary.setBirthdate(simpleDateFormat.parse("01-01-2005"));
-        contestantHilary.setEmail("hilary@icpc.com");
-        contestantHilary.setUniversity("StreetUniversity");
-        personRepository.save(contestantHilary);
-
-        Person contestantIsabella = new Person();
-        contestantIsabella.setName("Isabella");
-        contestantIsabella.setBirthdate(simpleDateFormat.parse("01-01-1995"));
-        contestantIsabella.setEmail("isabella@icpc.com");
-        contestantIsabella.setUniversity("StreetUniversity");
-        personRepository.save(contestantIsabella);
-
         // Create coaches
         Person coachJack = new Person();
         coachJack.setName("Jack");
@@ -121,13 +100,6 @@ public class SampleService {
         coachKarla.setEmail("karla@icpc.com");
         coachKarla.setUniversity("StreetUniversity");
         personRepository.save(coachKarla);
-
-        Person coachLewis = new Person();
-        coachLewis.setName("Lewis");
-        coachLewis.setBirthdate(simpleDateFormat.parse("01-01-1993"));
-        coachLewis.setEmail("lewis@icpc.com");
-        coachLewis.setUniversity("StreetUniversity");
-        personRepository.save(coachLewis);
 
         // Create contests
         Contest contest = new Contest();
@@ -170,7 +142,36 @@ public class SampleService {
         team2.setContestants(new HashSet<>(
                 Arrays.asList(contestantDaniel, contestantEleanor,
                         contestantFrank)));
+        team2.setAttendedContest(dummyContest);
         teamRepository.save(team2);
+
+        Person contestantGreg = new Person();
+        contestantGreg.setName("Greg");
+        contestantGreg.setBirthdate(simpleDateFormat.parse("01-01-2005"));
+        contestantGreg.setEmail("greg@icpc.com");
+        contestantGreg.setUniversity("StreetUniversity");
+        personRepository.save(contestantGreg);
+
+        Person contestantHilary = new Person();
+        contestantHilary.setName("Hilary");
+        contestantHilary.setBirthdate(simpleDateFormat.parse("01-01-2005"));
+        contestantHilary.setEmail("hilary@icpc.com");
+        contestantHilary.setUniversity("StreetUniversity");
+        personRepository.save(contestantHilary);
+
+        Person contestantIsabella = new Person();
+        contestantIsabella.setName("Isabella");
+        contestantIsabella.setBirthdate(simpleDateFormat.parse("01-01-2005"));
+        contestantIsabella.setEmail("isabella@icpc.com");
+        contestantIsabella.setUniversity("StreetUniversity");
+        personRepository.save(contestantIsabella);
+
+        Person coachLewis = new Person();
+        coachLewis.setName("Lewis");
+        coachLewis.setBirthdate(simpleDateFormat.parse("01-01-1993"));
+        coachLewis.setEmail("lewis@icpc.com");
+        coachLewis.setUniversity("StreetUniversity");
+        personRepository.save(coachLewis);
 
         Team team3 = new Team();
         team3.setName("UH-ClassZero");
@@ -178,15 +179,9 @@ public class SampleService {
         team3.setContestants(new HashSet<>(
                 Arrays.asList(contestantGreg, contestantHilary,
                         contestantIsabella)));
+        team3.setRank(6);
+        team3.setAttendedContest(contest);
         teamRepository.save(team3);
-
-        Team team4 = new Team();
-        team4.setName("UH-MAJA");
-        team4.setCoach(coachLewis);
-        team4.setContestants(new HashSet<>(
-                Arrays.asList(contestantGreg, contestantHilary)));
-        team4.setAttendedContest(dummyContest);
-        teamRepository.save(team4);
     }
 
 
@@ -249,6 +244,8 @@ public class SampleService {
         if (!contestOpt.isPresent()) throw new NotFoundException(
                 "Contest with id " + contestId + " not found");
 
+        validationService.validateContestIsEditable(contestOpt.get());
+
         ArrayList missing = new ArrayList<Long>();
         team.setContestants(team.getContestants().stream().map(x -> {
             if (x.getId() != null) {
@@ -265,7 +262,7 @@ public class SampleService {
                 "Person(s) with ids " + missing + " not found");
 
         Person coach = team.getCoach();
-        if (coach.getId() != null) {
+        if (coach != null && coach.getId() != null) {
             Optional<Person> coachOpt =
                     personRepository.findById(coach.getId());
             if (!coachOpt.isPresent())
@@ -285,7 +282,7 @@ public class SampleService {
         if (team.getCoach().getId() == null)
             personRepository.save(team.getCoach());
         team.setState(State.Pending);
-        team.setRank(0);
+        team.setRank(null);
         team.setAttendedContest(contest);
         teamRepository.save(team);
 

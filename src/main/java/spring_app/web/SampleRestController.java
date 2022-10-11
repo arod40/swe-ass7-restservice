@@ -33,6 +33,13 @@ public class SampleRestController {
         // Nothing to do
     }
 
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST,
+            reason = "Entity not found")
+    @ExceptionHandler(NotFoundException.class)
+    public void handleNotFoundException() {
+        // Nothing to do
+    }
+
     @GetMapping("/team/all")
     public List<Team> getTeams() {
         return service.findAllTeams();

@@ -38,16 +38,10 @@ public class Team {
                     referencedColumnName = "ID")},
             inverseJoinColumns = {@JoinColumn(name = "PERSON_ID",
                     referencedColumnName = "ID")})
-    @JsonIdentityInfo(
-            generator = ObjectIdGenerators.PropertyGenerator.class,
-            property = "id")
     @JsonIdentityReference(alwaysAsId = true)
     private Set<Person> contestants = new HashSet();
 
     @ManyToOne
-    @JsonIdentityInfo(
-            generator = ObjectIdGenerators.PropertyGenerator.class,
-            property = "id")
     @JsonIdentityReference(alwaysAsId = true)
     private Person coach;
 

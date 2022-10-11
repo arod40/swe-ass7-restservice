@@ -20,7 +20,7 @@ public class BusinessRulesValidationService {
     @Autowired
     TeamRepository teamRepository;
 
-    public void validateContestIdEditable(Contest contest)
+    public void validateContestIsEditable(Contest contest)
             throws BusinessConstraintViolationException {
         if (!contest.isEditable())
             throw new BusinessConstraintViolationException(
@@ -36,6 +36,7 @@ public class BusinessRulesValidationService {
 
     public void validateTeamRegistrationInContest(Team team, Contest contest)
             throws BusinessConstraintViolationException {
+        validateContestIsEditable(contest);
         if (team.getCoach() == null)
             throw new BusinessConstraintViolationException(
                     "A team must have a coach in order to be registered.");
@@ -62,7 +63,7 @@ public class BusinessRulesValidationService {
             throws BusinessConstraintViolationException {
 
         if (team.getAttendedContest() != null) {
-            validateContestIdEditable(team.getAttendedContest());
+            validateContestIsEditable(team.getAttendedContest());
             Contest contest = team.getAttendedContest();
             Team inContest =
                     contest.getTeams().stream().filter(x -> x.getId() ==
@@ -79,7 +80,7 @@ public class BusinessRulesValidationService {
 
     public void validateContestEdit(Contest contest)
             throws BusinessConstraintViolationException {
-        validateContestIdEditable(contest);
+        validateContestIsEditable(contest);
         if (contest.getCapacity() < contest.getTeams().size())
             throw new BusinessConstraintViolationException(
                     "The new capacity of the contest must be greater than or equal the current number of registered teams.");
@@ -87,7 +88,7 @@ public class BusinessRulesValidationService {
 
     public void validateTeamPromotionToSuperContest(Team team, Contest contest)
             throws BusinessConstraintViolationException {
-        validateContestIdEditable(contest);
+        validateContestIsEditable(contest);
         validateTeamRegistrationInContest(team, contest);
 
         if (contest.getPreliminaryRound() != team.getAttendedContest())
